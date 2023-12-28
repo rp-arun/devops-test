@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: misc-k8s-appset
+  namespace: argocd
+spec:
+  generators:
+  - git:
+      repoURL: https://github.com/credmark-devops/gitops.git
+      revision: HEAD
+      files:
+      - path: misc_k8s/${PATH}/*.yaml
+  template:
+    metadata:
+      name: misc-k8s
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/credmark-devops/gitops.git
+        targetRevision: HEAD
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: default

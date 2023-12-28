@@ -1,0 +1,30 @@
+  apiVersion: argoproj.io/v1alpha1
+  kind: ApplicationSet
+  metadata:
+    name: grafana-appset
+    namespace: argocd
+  spec:
+    generators:
+    - git:
+        repoURL: https://github.com/credmark-devops/gitops.git
+        revision: HEAD
+        files:
+        - path: environments/${PATH}/grafana-dashboards/**.yaml
+    template:
+      metadata:
+        name: '{{releaseName}}'
+      spec:
+        project: default
+        source:
+          repoURL: https://github.com/credmark-devops/gitops.git
+          targetRevision: HEAD
+          path: helm/grafana-dashboards
+          helm:
+            version: v3
+            passCredentials: false
+            valueFiles: 
+             - '../../environments/${PATH}/grafana-dashboards/{{releaseName}}.yaml'
+            releaseName: '{{releaseName}}'
+        destination:
+          server: https://kubernetes.default.svc
+          namespace: monitoring-logging

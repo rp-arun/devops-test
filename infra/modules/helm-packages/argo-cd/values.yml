@@ -1,0 +1,127 @@
+installCRDs: false
+server:
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      kubernetes.io/tls-acme: "true"
+      # Add basic auth for 1 extra layer of protection
+      #  nginx.ingress.kubernetes.io/auth-url: https://httpbin.org/basic-auth/admin/test@54321
+    hosts:
+      - ${HOST}
+    paths:
+      - ${PATH}
+    https: false
+  extraArgs:
+    - --insecure
+    - --basehref
+    - ${PATH}
+    - --rootpath
+    - ${PATH}
+  rbacConfig: 
+    policy.csv: |
+      p, role:org-admin, applications, *, */*, allow
+      p, role:org-admin, clusters, get, *, allow
+      p, role:org-admin, repositories, get, *, allow
+      p, role:org-admin, repositories, create, *, allow
+      p, role:org-admin, repositories, update, *, allow
+      p, role:org-admin, repositories, delete, *, allow
+      p, role:org-admin, logs, get, *, allow
+      p, role:org-admin, exec, create, */*, allow
+
+      g, ${SSO_GITHUB_ORG}:${SSO_ALLOWED_TEAM}, role:org-admin
+    policy.default: role:admin
+  config:
+    helm.valuesFileSchemes: >-
+      secrets
+    url: https://${HOST}${PATH}
+    dex.config: |
+      staticClients:
+        - id: ${ARGO_WORKFLOWS_SSO_CLIENT_ID}
+          name: Argo Workflow
+          redirectURIs:
+            - ${ARGO_WORKFLOWS_SSO_REDIRECT_URL}
+          secretEnv: ARGO_WORKFLOWS_SSO_CLIENT_SECRET
+        - id: ${GRAFANA_CLIENT_ID}
+          name: GRAFANA
+          redirectURIs:
+            - ${GRAFANA_SSO_REDIRECT_URL}
+          secret: ${GRAFANA_CLIENT_SECRET}
+      connectors:
+        - type: github
+          id: github
+          name: GitHub
+          config:
+            clientID: ${SSO_GITHUB_CLIENT_ID}
+            clientSecret: ${SSO_GITHUB_CLIENT_SECRET}
+            redirectURI: https://${HOST}${PATH}/api/dex/callback
+            orgs:
+            - name: ${SSO_GITHUB_ORG}
+            teams:
+            - ${SSO_ALLOWED_TEAM}
+repoServer:
+  env:
+    - name: HELM_PLUGINS
+      value: /custom-tools/helm-plugins/
+    - name: HELM_SECRETS_CURL_PATH
+      value: /custom-tools/curl
+    - name: HELM_SECRETS_SOPS_PATH
+      value: /custom-tools/sops
+    - name: HELM_SECRETS_VALS_PATH
+      value: /custom-tools/vals
+    - name: HELM_SECRETS_KUBECTL_PATH
+      value: /custom-tools/kubectl
+    - name: HELM_SECRETS_BACKEND
+      value: sops
+    # https://github.com/jkroepke/helm-secrets/wiki/Security-in-shared-environments
+    - name: HELM_SECRETS_VALUES_ALLOW_SYMLINKS
+      value: "false"
+    - name: HELM_SECRETS_VALUES_ALLOW_ABSOLUTE_PATH
+      value: "true"
+    - name: HELM_SECRETS_VALUES_ALLOW_PATH_TRAVERSAL
+      value: "false"
+    - name: HELM_SECRETS_WRAPPER_ENABLED
+      value: "true"
+    - name: HELM_SECRETS_HELM_PATH
+      value: /usr/local/bin/helm
+
+  volumes:
+    - name: custom-tools
+      emptyDir: {}
+  volumeMounts:
+    - mountPath: /custom-tools
+      name: custom-tools
+    - mountPath: /usr/local/sbin/helm
+      subPath: helm
+      name: custom-tools
+  initContainers:
+    - name: download-tools
+      image: alpine:latest
+      imagePullPolicy: IfNotPresent
+      command: [sh, -ec]
+      env:
+        - name: HELM_SECRETS_VERSION
+          value: "4.4.2"
+        - name: KUBECTL_VERSION
+          value: "1.26.1"
+        - name: VALS_VERSION
+          value: "0.24.0"
+        - name: SOPS_VERSION
+          value: "3.7.3"
+      args:
+        - |
+          mkdir -p /custom-tools/helm-plugins
+          wget -qO- https://github.com/jkroepke/helm-secrets/releases/download/v4.4.2/helm-secrets.tar.gz | tar -C /custom-tools/helm-plugins -xzf-;
+          
+          wget -qO /custom-tools/curl https://github.com/moparisthebest/static-curl/releases/latest/download/curl-amd64
+          wget -qO /custom-tools/sops https://github.com/mozilla/sops/releases/download/v3.7.3/sops-v3.7.3.linux
+          wget -qO /custom-tools/kubectl https://dl.k8s.io/release/v1.26.1/bin/linux/amd64/kubectl
+
+          wget -qO- https://github.com/helmfile/vals/releases/download/v0.24.0/vals_0.24.0_linux_amd64.tar.gz | tar -xzf- -C /custom-tools/ vals;
+
+          cp /custom-tools/helm-plugins/helm-secrets/scripts/wrapper/helm.sh /custom-tools/helm
+          
+          chmod +x /custom-tools/*
+      volumeMounts:
+        - mountPath: /custom-tools
+          name: custom-tools
