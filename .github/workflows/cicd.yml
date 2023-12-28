@@ -3,7 +3,7 @@ on:
     branches:
       - main
 
-name: Build and push images to GHCR
+name: Build and push images to DockerHub
 
 jobs:
   deploy:
@@ -30,6 +30,26 @@ jobs:
         # Login to GitHub registry
         echo $DOCKER_PASSWORD | docker login $DOCKER_REGISTRY -u $DOCKER_USERNAME --password-stdin
         # Push images
-        echo "Pushing image to New Container registry..."
+        echo "Pushing image to Container registry..."
+        docker push $DOCKER_IMAGE_URL:$IMAGE_TAG
+        echo "::set-output name=image::$DOCKER_IMAGE_URL:$IMAGE_TAG"
+
+    - name: Build and Push to Docker container registry for Node-app
+      id: build-tag-push-node-image-new-registry
+      env:
+        IMAGE_TAG: latest
+        DOCKER_REGISTRY: docker.io
+        DOCKER_USERNAME: arun2705
+        DOCKER_IMAGE: node-app
+        DOCKER_PASSWORD: Arun@2705
+        DOCKER_IMAGE_URL: ${{env.DOCKER_REGISTRY}}/${{env.DOCKER_USERNAME}}/${{env.DOCKER_IMAGE}}
+      run: |
+        DOCKER_IMAGE_URL=$DOCKER_REGISTRY/$DOCKER_USERNAME/$DOCKER_IMAGE
+        # Build image
+        docker build -t $DOCKER_IMAGE_URL:$IMAGE_TAG ./apps-source-code/NodeJs
+        # Login to GitHub registry
+        echo $DOCKER_PASSWORD | docker login $DOCKER_REGISTRY -u $DOCKER_USERNAME --password-stdin
+        # Push images
+        echo "Pushing image to Container registry..."
         docker push $DOCKER_IMAGE_URL:$IMAGE_TAG
         echo "::set-output name=image::$DOCKER_IMAGE_URL:$IMAGE_TAG"
