@@ -19,9 +19,9 @@ jobs:
       env:
         IMAGE_TAG: latest
         DOCKER_REGISTRY: docker.io
-        DOCKER_USERNAME: arun2705
+        DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
         DOCKER_IMAGE: python-app
-        DOCKER_PASSWORD: Arun@2705
+        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
         DOCKER_IMAGE_URL: ${{env.DOCKER_REGISTRY}}/${{env.DOCKER_USERNAME}}/${{env.DOCKER_IMAGE}}
       run: |
         DOCKER_IMAGE_URL=$DOCKER_REGISTRY/$DOCKER_USERNAME/$DOCKER_IMAGE
@@ -39,9 +39,9 @@ jobs:
       env:
         IMAGE_TAG: latest
         DOCKER_REGISTRY: docker.io
-        DOCKER_USERNAME: arun2705
+        DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
         DOCKER_IMAGE: node-app
-        DOCKER_PASSWORD: Arun@2705
+        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
         DOCKER_IMAGE_URL: ${{env.DOCKER_REGISTRY}}/${{env.DOCKER_USERNAME}}/${{env.DOCKER_IMAGE}}
       run: |
         DOCKER_IMAGE_URL=$DOCKER_REGISTRY/$DOCKER_USERNAME/$DOCKER_IMAGE
