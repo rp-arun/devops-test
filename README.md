@@ -23,7 +23,9 @@ docker-compose up
 ```
 
 **Create a table in the psql:**
-
+```bash
+psql postgres://postgres:postgres@localhost:5432/postgres
+```
 ```sql
 CREATE TABLE numbers (
 id SERIAL PRIMARY KEY,
