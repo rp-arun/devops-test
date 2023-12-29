@@ -34,7 +34,9 @@ sorted_numbers integer[]
 **To test:**
 
 ```bash
-curl -X POST -H 'Content-Type: application/json' -d '{"numbers":[3,2,1]}' http://ac19e9d9c14e0438fbec29bb3a35d3c4-2006065402.us-west-2.elb.amazonaws.com/numbers
+curl -X POST -H \
+'Content-Type: application/json' -d '{"numbers":[3,2,1]}' \
+http://localhost:3000/numbers
 ```
 
 ## Test 2: Infrastructure as Code for CI/CD Pipeline
@@ -43,7 +45,7 @@ curl -X POST -H 'Content-Type: application/json' -d '{"numbers":[3,2,1]}' http:/
     
     > code available in **.github/workflows/cicd.yml**
     > 
-- The entire micro-services are deployed in **Aws-managed Kubernetes services (EKS)**. And automate the infra creation using **Terraform**.
+- The entire micro-services are deployed in **Aws-managed Kubernetes services (EKS)** and their node groups are deployed in **private subnets** to ensure the security. For user access a **loadbalancer is created with internet facing**. And automated the infra creation using **Terraform**.
 - Implemented **Gitops** strategy using **ArgoCD** to automate the **Continuous Delivery** process.
 - **ArgoCD** is a Continuous Delivery tools that continuously watch the GitHub repository, if it deducts any file change it will sync the deployments inside the Kubernetes cluster.
 
@@ -79,14 +81,16 @@ The user-facing NodeJs application is exposed as a load-balancer service and has
 **To access the app:**
 
 ```bash
-curl -X POST -H 'Content-Type: application/json' -d '{"numbers":[3,2,1]}' http://ac19e9d9c14e0438fbec29bb3a35d3c4-2006065402.us-west-2.elb.amazonaws.com/numbers
+curl -X POST -H 'Content-Type: application/json' \
+-d '{"numbers":[3,2,1]}' \
+a4e07024cdfb9418da425c1098eaad71-884038150.us-west-2.elb.amazonaws.com/numbers
 ```
 
 **To access ArgoCD:**
 
-Link: [ArgoCd](https://a9541a05d3ad74a699a83d3aabcf02a8-1578717964.us-west-2.elb.amazonaws.com/applications)
+Link: [ArgoCd](https://aa73a2c9a73b943db8cf7973233c000f-1477094297.us-west-2.elb.amazonaws.com/applications)
 
-*SSL is not enabled so, click on advanced and proceed with the link.*
+*SSL is not enabled so, please click on advanced and proceed with the link.*
 
 Username: admin
 

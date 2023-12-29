@@ -1,7 +1,7 @@
 provider "aws" {
   region = local.region
-  access_key = "AKIAYXELY4UJB5WMMW4C"
-  secret_key = "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"
+  access_key = ""
+  secret_key = ""
   assume_role {
     role_arn = var.AWS_EKS_ADMIN_ROLE_ARN
   }
