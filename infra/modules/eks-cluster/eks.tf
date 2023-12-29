@@ -5,20 +5,19 @@ module "eks" {
   version = "18.28.0"
 
   cluster_name    = "devops-cluster-prod"
-  cluster_version = "1.23"
+  cluster_version = "1.28"
 
-  # aws-ebs-csi-driver plugin 
-  cluster_addons = {
-    aws-ebs-csi-driver = {
-      resolve_conflicts        = "OVERWRITE"
-      service_account_role_arn = module.aws_ebs_csi_driver_irsa_role.iam_role_arn
-    }
-  }
+  # # aws-ebs-csi-driver plugin 
+  # cluster_addons = {
+  #   aws-ebs-csi-driver = {
+  #     resolve_conflicts        = "OVERWRITE"
+  #     service_account_role_arn = module.aws_ebs_csi_driver_irsa_role.iam_role_arn
+  #   }
+  # }
 
   vpc_id     = var.vpc_id
-  subnet_ids = var.subnet_ids
+  subnet_ids = var.private_subnet_ids
 
-  # Required for Karpenter role below
   enable_irsa = true
 
   # We will rely only on the cluster security group created by the EKS service
@@ -26,9 +25,7 @@ module "eks" {
   create_cluster_security_group = false
   create_node_security_group    = false
 
-  # Only need one node to get Karpenter up and running.
   # This ensures core services such as VPC CNI, CoreDNS, etc. are up and running
-  # so that Karpetner can be deployed and start managing compute capacity as required
   eks_managed_node_groups = {
     default= {
       instance_types = ["t2.medium"]
@@ -47,17 +44,17 @@ module "eks" {
 
 #ISRA for aws-ebs-csi-driver
 
-module "aws_ebs_csi_driver_irsa_role" {
-  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+# module "aws_ebs_csi_driver_irsa_role" {
+#   source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
 
-  role_name = "aws-ebs-csi-driver"
+#   role_name = "aws-ebs-csi-driver"
 
-  attach_ebs_csi_policy = true
+#   attach_ebs_csi_policy = true
 
-  oidc_providers = {
-    main = {
-      provider_arn               = module.eks.oidc_provider_arn
-      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
-    }
-  }
-}
+#   oidc_providers = {
+#     main = {
+#       provider_arn               = module.eks.oidc_provider_arn
+#       namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+#     }
+#   }
+# }
