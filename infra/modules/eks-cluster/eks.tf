@@ -4,7 +4,7 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "18.28.0"
 
-  cluster_name    = "devops-cluster"
+  cluster_name    = "devops-cluster-prod"
   cluster_version = "1.23"
 
   # aws-ebs-csi-driver plugin 

@@ -45,14 +45,6 @@ terraform {
       source  = "hashicorp/local"
       version = "2.2.3"
     }
-    postgresql = {
-      source = "cyrilgdn/postgresql"
-      version = "1.17.1"
-    }
-    snowflake = {
-      source  = "Snowflake-Labs/snowflake"
-      version = "~> 0.40.0"
-    }
 
   }
 

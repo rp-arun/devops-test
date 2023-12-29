@@ -10,10 +10,10 @@ locals {
     cidrsubnet(var.cidr, 8, 5),
     cidrsubnet(var.cidr, 8, 6)
   ]
-  cluster_name = "devops-vpc"
+  cluster_name = "devops-cluster-prod"
   tags = {
     Operator = "Terraform"
-    Name     = "devops-vpc"
+    Name     = "devops-cluster"
   }
 }
 
