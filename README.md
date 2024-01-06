@@ -80,6 +80,10 @@ Add the necessary variables like aws role, secret key, and access keys.
 
 The user-facing NodeJs application is exposed as a load-balancer service and has an IP address for the user to access.
 
+⚠️ **Warning** ⚠️
+
+> The links provided below are no longer functional as the infrastructure has been taken down.
+
 **To access the app:**
 
 ```bash
